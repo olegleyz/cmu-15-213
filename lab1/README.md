@@ -71,6 +71,8 @@ What makes this setup elegant is the seamless integration between host and conta
 
 ### Completed Functions
 - ✅ **bitXor**: Implemented XOR using only `&` and `~` operators
+- ✅ **tmin**: Returns two's complement minimum value (`0b10000000_00000000_00000000_00000000` = -2^31)
+- ✅ **allOddBits**: Checks if all odd-numbered bits are set to 1
 
 #### Reflection on XOR Implementation
 
@@ -83,6 +85,21 @@ The solution unfolded in steps:
 4. Final solution: `~(~(~x&y)&~(x&~y))`
 
 Each constraint forced me deeper into Boolean algebra fundamentals!
+
+#### Reflection on allOddBits Implementation
+
+This function taught me about the lab's constant restrictions the hard way! My first approach was straightforward - use the mask `0xAAAAAAAA` to check odd bits. But the lab only allows constants from `0x0` to `0xFF`, so I had to get creative.
+
+The solution involved building the 32-bit mask from `0xAA` using bit shifts:
+```c
+int first = 0xaa;                    // 0xAA
+int second = first << 8;             // 0xAA00  
+int third = second << 8;             // 0xAA0000
+int fourth = third << 8;             // 0xAA000000
+int mask = first | second | third | fourth;  // 0xAAAAAAAA
+```
+
+Then I used the XOR trick: `(x & mask) ^ mask` equals 0 only when all odd bits are set. The `!` operator converts 0 to 1 and any non-zero value to 0 - a handy Boolean conversion technique!
 
 ### Next Steps
 - Continue implementing the remaining bit manipulation functions
