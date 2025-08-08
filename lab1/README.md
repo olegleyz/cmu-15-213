@@ -74,7 +74,15 @@ What makes this setup elegant is the seamless integration between host and conta
 
 #### Reflection on XOR Implementation
 
-Implementing XOR with just `&` and `~` was trickier than expected! The breakthrough came from visualizing XOR as set operations using the [symmetric difference Venn diagram](https://en.wikipedia.org/wiki/Symmetric_difference#/media/File:Venn0110.svg) from Wikipedia: XOR is the union of two sets minus their intersection (A ∪ B) - (A ∩ B). In bit terms, this means "bits that are in A or B, but not in both." Since addition and subtraction aren't allowed in this lab, I'll need to find another way to express "minus the intersection" using only the permitted operators.
+Implementing XOR with just `&` and `~` was trickier than expected! The breakthrough came from visualizing XOR as set operations using the [symmetric difference Venn diagram](https://en.wikipedia.org/wiki/Symmetric_difference#/media/File:Venn0110.svg) from Wikipedia: XOR is the union of two sets minus their intersection (A ∪ B) - (A ∩ B). In bit terms, this means "bits that are in A or B, but not in both."
+
+The solution unfolded in steps:
+1. First, I realized `(~x&y) + (x&~y)` expresses "bits in A or B, but not both"
+2. Since addition isn't allowed, I replaced it with OR: `(~x&y)|(x&~y)`
+3. Since OR isn't allowed either, I used De Morgan's law: `A|B = ~(~A&~B)`
+4. Final solution: `~(~(~x&y)&~(x&~y))`
+
+Each constraint forced me deeper into Boolean algebra fundamentals!
 
 ### Next Steps
 - Continue implementing the remaining bit manipulation functions
