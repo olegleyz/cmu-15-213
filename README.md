@@ -14,6 +14,7 @@ This curiosity led me to realize that to truly appreciate and design robust stor
 - **University**: Carnegie Mellon University
 - **Focus**: Refreshing memory management fundamentals and system-level programming
 - **Goal**: Building a stronger foundation for understanding distributed storage architectures
+- **Lectures**: [YouTube Playlist (2017)](https://youtu.be/cEFXuhPm65k?si=1e5OfbJOr_sITzow)
 
 ## Labs Completed
 
