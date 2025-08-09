@@ -74,6 +74,7 @@ What makes this setup elegant is the seamless integration between host and conta
 - ✅ **tmin**: Returns two's complement minimum value (`0b10000000_00000000_00000000_00000000` = -2^31)
 - ✅ **allOddBits**: Checks if all odd-numbered bits are set to 1
 - ✅ **isTmax**: Detects if input is the maximum two's complement integer
+- ✅ **negate**: Implements two's complement negation using `~x + 1`
 
 #### Reflection on XOR Implementation
 
@@ -111,6 +112,23 @@ But here's the gotcha: `-1` also satisfies this condition! When `x = -1` (all bi
 The solution: `!((x + 1) ^ ~x) ^ !(~x)` - the first part checks the Tmax property, and `^ !(~x)` excludes `-1` since `~(-1) = 0`, making `!(~x) = 1`, which flips the result back to 0 for the `-1` case.
 
 Edge cases like this really test your understanding of two's complement arithmetic!
+
+#### Reflection on negate Implementation
+
+This one was satisfying because I discovered the pattern empirically! By writing down small numbers on paper and inverting their bits, I noticed that the inverted number was always exactly 1 different from the negated number. This led me to the fundamental two's complement negation formula: `-x = ~x + 1`.
+
+Here are the concrete examples that revealed the pattern:
+
+| Decimal | Binary (4-bit) | ~x (Inverse) | ~x + 1 | Result |
+|---------|----------------|--------------|--------|---------|
+| 1       | 0001          | 1110         | 1111   | -1 |
+| 4       | 0100          | 1011         | 1100   | -4 |
+| 7       | 0111          | 1000         | 1001   | -7 |
+| -1      | 1111          | 0000         | 0001   | 1  |
+| -4      | 1100          | 0011         | 0100   | 4  |
+| -7      | 1001          | 0110         | 0111   | 7  |
+
+It's fascinating how hands-on experimentation can lead you to the same insights that are formally presented in Chapter 2 of Bryant and O'Hallaron's "Computer Systems: A Programmer's Perspective." Sometimes the best way to understand these bit manipulation concepts is to work through concrete examples yourself!
 
 ### Next Steps
 - Continue implementing the remaining bit manipulation functions
