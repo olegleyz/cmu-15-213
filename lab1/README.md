@@ -73,6 +73,7 @@ What makes this setup elegant is the seamless integration between host and conta
 - ✅ **bitXor**: Implemented XOR using only `&` and `~` operators
 - ✅ **tmin**: Returns two's complement minimum value (`0b10000000_00000000_00000000_00000000` = -2^31)
 - ✅ **allOddBits**: Checks if all odd-numbered bits are set to 1
+- ✅ **isTmax**: Detects if input is the maximum two's complement integer
 
 #### Reflection on XOR Implementation
 
@@ -100,6 +101,16 @@ int mask = first | second | third | fourth;  // 0xAAAAAAAA
 ```
 
 Then I used the XOR trick: `(x & mask) ^ mask` equals 0 only when all odd bits are set. The `!` operator converts 0 to 1 and any non-zero value to 0 - a handy Boolean conversion technique!
+
+#### Reflection on isTmax Implementation
+
+This one was brutal! The key insight is that `Tmax` has a special property: `Tmax + 1 = Tmin`, and `Tmax ^ ~Tmax = 0`. So `(x + 1) ^ ~x` should equal 0 for `Tmax`.
+
+But here's the gotcha: `-1` also satisfies this condition! When `x = -1` (all bits set), `x + 1 = 0` and `~x = 0`, so `(x + 1) ^ ~x = 0 ^ 0 = 0`. 
+
+The solution: `!((x + 1) ^ ~x) ^ !(~x)` - the first part checks the Tmax property, and `^ !(~x)` excludes `-1` since `~(-1) = 0`, making `!(~x) = 1`, which flips the result back to 0 for the `-1` case.
+
+Edge cases like this really test your understanding of two's complement arithmetic!
 
 ### Next Steps
 - Continue implementing the remaining bit manipulation functions
