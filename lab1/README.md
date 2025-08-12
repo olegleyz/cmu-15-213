@@ -130,6 +130,24 @@ Here are the concrete examples that revealed the pattern:
 
 It's fascinating how hands-on experimentation can lead you to the same insights that are formally presented in Chapter 2 of Bryant and O'Hallaron's "Computer Systems: A Programmer's Perspective." Sometimes the best way to understand these bit manipulation concepts is to work through concrete examples yourself!
 
+#### Reflection on Conditional Implementation
+
+I implemented the ternary operator x ? y : z using only bitwise operations.
+The main challenge was that !!x gives 1 for any non-zero x, not an all-bits mask.
+
+A useful trick was recognizing that ~(!x) + 1 produces a mask directly:
+```
+    For x != 0: !x = 0 → ~0 + 1 = 0x00000000
+    For x == 0: !x = 1 → ~1 + 1 = 0xFFFFFFFF
+```
+This mask can then select between y and z without branching:
+
+```c
+int mask = ~(!x) + 1;            // 0 if x != 0, all bits 1 if x == 0
+return (~mask & y) | (mask & z); // y if x != 0, z if x == 0
+```
+It’s a good example of how small bitwise patterns can be reused to solve larger problems.
+
 ### Next Steps
 - Continue implementing the remaining bit manipulation functions
 - Test each function thoroughly with the provided test suite
