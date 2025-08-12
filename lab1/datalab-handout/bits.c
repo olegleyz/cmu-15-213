@@ -199,7 +199,9 @@ int negate(int x) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-  return 2;
+  int lower_bound = !((x + ~0x30 + 1) >> 31);
+  int upper_bound = !((0x39 + ~x + 1) >> 31);
+  return lower_bound & upper_bound;
 }
 /* 
  * conditional - same as x ? y : z 

@@ -75,6 +75,8 @@ What makes this setup elegant is the seamless integration between host and conta
 - ✅ **allOddBits**: Checks if all odd-numbered bits are set to 1
 - ✅ **isTmax**: Detects if input is the maximum two's complement integer
 - ✅ **negate**: Implements two's complement negation using `~x + 1`
+- ✅ **isAsciiDigit**: Checks if input is ASCII code for digits '0'-'9' (0x30-0x39)
+- ✅ **conditional**: Implements ternary operator `x ? y : z` using bit masking
 
 #### Reflection on XOR Implementation
 
@@ -147,6 +149,10 @@ int mask = ~(!x) + 1;            // 0 if x != 0, all bits 1 if x == 0
 return (~mask & y) | (mask & z); // y if x != 0, z if x == 0
 ```
 It’s a good example of how small bitwise patterns can be reused to solve larger problems.
+
+#### Reflection on isAsciiDigit Implementation
+
+Checked if `x` is between 0x30 and 0x39 by testing if both `(x - 0x30)` and `(0x39 - x)` are non-negative. Used the sign bit to detect negative results: `(result >> 31)` gives 1 for negative numbers, 0 for non-negative. Applied `!` to flip the logic and combined both bounds with `&`.
 
 ### Next Steps
 - Continue implementing the remaining bit manipulation functions
