@@ -77,6 +77,7 @@ What makes this setup elegant is the seamless integration between host and conta
 - ✅ **negate**: Implements two's complement negation using `~x + 1`
 - ✅ **isAsciiDigit**: Checks if input is ASCII code for digits '0'-'9' (0x30-0x39)
 - ✅ **conditional**: Implements ternary operator `x ? y : z` using bit masking
+- ✅ **isLessOrEqual**: Implements `x <= y` comparison with overflow handling
 
 #### Reflection on XOR Implementation
 
@@ -153,6 +154,10 @@ It’s a good example of how small bitwise patterns can be reused to solve large
 #### Reflection on isAsciiDigit Implementation
 
 Checked if `x` is between 0x30 and 0x39 by testing if both `(x - 0x30)` and `(0x39 - x)` are non-negative. Used the sign bit to detect negative results: `(result >> 31)` gives 1 for negative numbers, 0 for non-negative. Applied `!` to flip the logic and combined both bounds with `&`.
+
+#### Reflection on isLessOrEqual Implementation
+
+The main challenge was overflow in subtraction `x - y`. For example, comparing Tmin < Tmax in 4-bit: `0b1000 < 0b0111` → `0b1000 - 0b0111 < 0` → `0b1000 + 0b1000 + 1 < 0` → `0b10001 < 0` → (MSB discarded) `0b0001 < 0` is False. Handled this by splitting into cases: check if x is negative and y is positive (always true), check equality with XOR, and only do subtraction when both have the same sign (no overflow risk).
 
 ### Next Steps
 - Continue implementing the remaining bit manipulation functions
