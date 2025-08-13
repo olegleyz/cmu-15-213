@@ -78,6 +78,7 @@ What makes this setup elegant is the seamless integration between host and conta
 - ✅ **isAsciiDigit**: Checks if input is ASCII code for digits '0'-'9' (0x30-0x39)
 - ✅ **conditional**: Implements ternary operator `x ? y : z` using bit masking
 - ✅ **isLessOrEqual**: Implements `x <= y` comparison with overflow handling
+- ✅ **logicalNeg**: Implements `!` operator using arithmetic right shift
 
 #### Reflection on XOR Implementation
 
@@ -158,6 +159,10 @@ Checked if `x` is between 0x30 and 0x39 by testing if both `(x - 0x30)` and `(0x
 #### Reflection on isLessOrEqual Implementation
 
 The main challenge was overflow in subtraction `x - y`. For example, comparing Tmin < Tmax in 4-bit: `0b1000 < 0b0111` → `0b1000 - 0b0111 < 0` → `0b1000 + 0b1000 + 1 < 0` → `0b10001 < 0` → (MSB discarded) `0b0001 < 0` is False. Handled this by splitting into cases: check if x is negative and y is positive (always true), check equality with XOR, and only do subtraction when both have the same sign (no overflow risk).
+
+#### Reflection on logicalNeg Implementation
+
+Implementing `!` without using `!` required detecting if `x` is zero. Initial approach of checking if `x` and `x-1` have different signs failed due to overflow issues. The solution uses the fact that arithmetic right shift of either `x` or `~x + 1` (negation) gives -1 for any non-zero number, but 0 only when `x` is zero. ORing these shifts isolates zero as the unique case where both are 0.
 
 ### Next Steps
 - Continue implementing the remaining bit manipulation functions
