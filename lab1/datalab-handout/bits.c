@@ -262,7 +262,33 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0;
+  int sign = x >> 31;
+  // If negative, flip all bits (~x) to work with the absolute value of the number, without considering its sign bit.
+  // This way the highest set bit position corresponds to the number of magnitude bits needed.
+  x ^= sign; 
+
+  // Use binary search to find position of most significant 1 bit in x.
+  // !!(x >> k) → 1 if there is a 1 bit at position >= k, else 0.
+  // << shiftAmount → converts that boolean into the offset value for the bit position.
+  int bit_16 = !!(x >> 16) << 4; 
+  x = x >> bit_16; // If high 16 bits nonzero, add 16 to result and shift down.
+  
+  int bit_8 = !!(x >> 8) << 3; 
+  x >>= bit_8;
+  
+  int bit_4 = !!(x >> 4) << 2;
+  x >>= bit_4;
+  
+  int bit_2 = !!(x >> 2) << 1;
+  x >>= bit_2;
+
+  int bit_1 = !!(x >> 1);
+  x >>= bit_1;
+
+  int bit_0 = x;
+  
+  // Sum all offsets +1 for the sign bit
+  return bit_16 + bit_8 + bit_4 + bit_2 + bit_1 + bit_0 + 1;
 }
 //float
 /* 

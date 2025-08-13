@@ -79,6 +79,7 @@ What makes this setup elegant is the seamless integration between host and conta
 - ✅ **conditional**: Implements ternary operator `x ? y : z` using bit masking
 - ✅ **isLessOrEqual**: Implements `x <= y` comparison with overflow handling
 - ✅ **logicalNeg**: Implements `!` operator using arithmetic right shift
+- ✅ **howManyBits**: Calculates minimum bits needed for two's complement representation
 
 #### Reflection on XOR Implementation
 
@@ -163,6 +164,10 @@ The main challenge was overflow in subtraction `x - y`. For example, comparing T
 #### Reflection on logicalNeg Implementation
 
 Implementing `!` without using `!` required detecting if `x` is zero. Initial approach of checking if `x` and `x-1` have different signs failed due to overflow issues. The solution uses the fact that arithmetic right shift of either `x` or `~x + 1` (negation) gives -1 for any non-zero number, but 0 only when `x` is zero. ORing these shifts isolates zero as the unique case where both are 0.
+
+#### Reflection on howManyBits Implementation
+
+Finding the minimum bits needed for two's complement representation required locating the most significant bit. Initial approach of shifting right one bit at a time and checking if non-zero exceeded the 90-operation limit (3 operations per bit). The solution uses binary search: check upper 16 bits, then upper 8, 4, 2, 1 to efficiently narrow down the MSB position. For negative numbers, XOR with sign bit converts to equivalent positive representation.
 
 ### Next Steps
 - Continue implementing the remaining bit manipulation functions
