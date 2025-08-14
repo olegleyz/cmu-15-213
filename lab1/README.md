@@ -184,7 +184,9 @@ Implementing IEEE 754 single-precision floating point multiplication by 2 requir
 
 The key insight is that multiplying by 2 in floating point is usually just incrementing the exponent, except for denormalized numbers where you shift the fraction.
 
-### Next Steps
-- Continue implementing the remaining bit manipulation functions
-- Test each function thoroughly with the provided test suite
-- Optimize solutions to meet the operator count constraints
+#### Backlog
+
+Moving on to the next labs while leaving two floating point functions for future exploration:
+
+- **floatFloat2Int**: Convert IEEE 754 float to integer representation
+- **floatPower2**: Compute 2^x in IEEE 754 format
