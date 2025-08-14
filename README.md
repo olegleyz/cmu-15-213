@@ -23,6 +23,13 @@ This curiosity led me to realize that to truly appreciate and design robust stor
 - **Description**: Introduction to C programming and basic system concepts
 - **Directory**: `lab0/`
 
+### Lab 1: Data Lab - Bit Manipulation
+- **Status**: ✅ Completed (11/13 functions)
+- **Description**: Bit manipulation puzzles using only basic operators
+- **Directory**: `lab1/`
+- **Key Topics**: Boolean algebra, two's complement arithmetic, IEEE 754 floating point
+- **Highlights**: Docker setup for Apple Silicon compatibility, empirical discovery of bit patterns
+
 ## Repository Structure
 
 ```
@@ -30,6 +37,12 @@ cmu-15213-labs/
 ├── README.md
 ├── lab0/
 │   └── [Lab 0 files]
+├── lab1/
+│   ├── README.md
+│   ├── datalab-handout/
+│   │   ├── bits.c (11/13 functions implemented)
+│   │   └── [Lab materials]
+│   └── datalab-handout.tar
 └── [Additional labs will be added as completed]
 ```
 
