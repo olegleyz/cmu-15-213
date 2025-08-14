@@ -303,7 +303,36 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-  return 2;
+  int sign = uf >> 31;
+  int exp = (uf >> 23) & 0xFF; // 0b1111_1111 to extract exponent
+  int frac = uf & 0x7FFFFF; // 23 bits to extract mantissa
+
+  // special cases
+  // If exp = 255 (0xFF):
+  // and Fraction = 0 → ±∞
+  // and Fraction ≠ 0 → NaN
+  if (exp == 0xFF) {
+    return uf;
+  }
+
+  if (exp == 0) {
+    // denormalized (0.xxx)
+    // multiplying fraction by 2 means shifting fraction left
+    frac <<= 1;
+    if (frac & 0x800000) {
+      exp = 1;
+      frac &= 0x7FFFFF;
+    }
+  } else {
+    // normalized
+    exp += 1;
+    if (exp == 0xFF) {
+      // infinity 
+      frac = 0;
+    }
+  }
+
+  return (sign << 31) | (exp << 23) | frac;
 }
 /* 
  * floatFloat2Int - Return bit-level equivalent of expression (int) f

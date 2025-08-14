@@ -80,6 +80,7 @@ What makes this setup elegant is the seamless integration between host and conta
 - ✅ **isLessOrEqual**: Implements `x <= y` comparison with overflow handling
 - ✅ **logicalNeg**: Implements `!` operator using arithmetic right shift
 - ✅ **howManyBits**: Calculates minimum bits needed for two's complement representation
+- ✅ **floatScale2**: Multiplies IEEE 754 single-precision float by 2
 
 #### Reflection on XOR Implementation
 
@@ -168,6 +169,20 @@ Implementing `!` without using `!` required detecting if `x` is zero. Initial ap
 #### Reflection on howManyBits Implementation
 
 Finding the minimum bits needed for two's complement representation required locating the most significant bit. Initial approach of shifting right one bit at a time and checking if non-zero exceeded the 90-operation limit (3 operations per bit). The solution uses binary search: check upper 16 bits, then upper 8, 4, 2, 1 to efficiently narrow down the MSB position. For negative numbers, XOR with sign bit converts to equivalent positive representation.
+
+#### Reflection on floatScale2 Implementation
+
+Implementing IEEE 754 single-precision floating point multiplication by 2 required understanding the format:
+
+![IEEE 754 Single Precision Format](https://media.geeksforgeeks.org/wp-content/uploads/Single-Precision-IEEE-754-Floating-Point-Standard.jpg)
+*Source: GeeksforGeeks*
+
+**Special Cases Handled:**
+- **Exp = 255 (0xFF)**: Return unchanged (±∞ or NaN)
+- **Exp = 0**: Denormalized numbers - shift fraction left, handle overflow to normalized
+- **1 ≤ Exp ≤ 254**: Normalized numbers - increment exponent by 1, handle overflow to infinity
+
+The key insight is that multiplying by 2 in floating point is usually just incrementing the exponent, except for denormalized numbers where you shift the fraction.
 
 ### Next Steps
 - Continue implementing the remaining bit manipulation functions
