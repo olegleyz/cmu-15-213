@@ -211,3 +211,90 @@ Phase 1 defused. How about the next one?
 1 2 4 8 16 32
 That's number 2. Keep going!
 ```
+
+## Reflections on Memory and the Binary Layout
+
+By now, I wish I had a fully holistic view of how memory is used by the program (I guess that comes later in 15-213). Along the way I noticed something interesting:
+
+* Local elements (like the integers in Phase 2) are stored on the **stack**.
+* Constant strings (like `"Border relations with Canada have never been better."`) are stored in another part of memory — the **read-only data segment** (`.rodata`).
+
+This made me wonder: where exactly is all this memory located?
+
+### Process Memory Layout
+
+What I’ve learned so far is that a typical process memory looks like this:
+
+```
+
+High addresses
++-------------------+
+\|       stack       |  ← grows downward (local variables, return addresses)
++-------------------+
+\|       heap        |  ← grows upward (malloc/new allocations)
++-------------------+
+\| uninitialized     |  ← BSS segment (globals/statics = 0)
+\|  data             |
++-------------------+
+\| initialized data  |  ← globals/statics with values (int x = 5;)
++-------------------+
+\|    text/code      |  ← program instructions (read-only)
+\|    rodata         |  ← constants, string literals
++-------------------+
+Low addresses
+
+````
+
+* **Stack** → fresh frame per function call. Local variables live here.  
+* **Heap** → dynamic allocations via `malloc`/`new`.  
+* **.data** → global/static variables initialized with non-zero values.  
+* **.bss** → global/static variables uninitialized or initialized to 0.  
+* **.rodata** → constants and string literals (immutable).  
+* **.text** → the actual machine instructions.  
+
+All of these live in **RAM at runtime**, but they are mapped into different *virtual addresses*. The OS loader sets this up when it loads the ELF binary.
+
+That’s why:
+
+* Stack locals often show addresses like `0x7fff...` (on x86-64 Linux).
+* String literals show addresses like `0x402400`.
+* Even though both end up in RAM, they appear in completely different regions of the virtual address space.
+
+### Binary on Disk vs. Process in Memory
+
+On disk, the ELF file (`bomb`) contains **sections**:
+
+* `.text` → instructions (`objdump -d bomb` shows them).
+* `.rodata` → string literals and constants (`objdump -s -j .rodata bomb` shows them).
+* `.data` → initialized globals/statics.
+* `.bss` → uninitialized globals/statics (takes no space on disk; memory reserved at runtime).
+* `.symtab` / `.dynsym` → symbol tables for functions and variables.
+
+Example: inspecting `.data` in the bomb showed some initialized globals:
+
+```bash
+objdump -s -j .data bomb
+````
+
+```
+6030e0 00000000 00000000 00000000 00000000  ................
+6030f0 24000000 00000000 10316000 00000000  $........1`.....
+603100 30316000 00000000 00000000 00000000  01`.............
+```
+
+Symbols can also be viewed:
+
+```bash
+readelf -s bomb
+```
+
+```
+Symbol table '.symtab' contains 157 entries:
+85: 0000000000400ee0    28 FUNC    GLOBAL DEFAULT   13 phase_1
+```
+
+At runtime, the kernel maps all of these sections into the process’s virtual memory, with stack and heap regions added on top. That’s why I can use `objdump` and `readelf` to explore what’s baked into the binary, and then see those same addresses show up when debugging with GDB.
+
+---
+
+Overall, I feel a bit like a “kiddo-hacker” now, but it’s fascinating to finally see in reality the concepts I only heard about before.
