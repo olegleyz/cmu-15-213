@@ -295,6 +295,62 @@ Symbol table '.symtab' contains 157 entries:
 
 At runtime, the kernel maps all of these sections into the process’s virtual memory, with stack and heap regions added on top. That’s why I can use `objdump` and `readelf` to explore what’s baked into the binary, and then see those same addresses show up when debugging with GDB.
 
+## Multi-Dimensional Arrays and Memory
+
+When declaring multi-dimensional arrays, where they live in memory depends on scope:
+
+### Inside a Function (Stack)
+
+```c
+void f() {
+    int arr[3][4];  // 3x4 ints
+}
+````
+
+* The array is stored on the **stack**.
+* Compiler reserves `3 * 4 * sizeof(int)` bytes in the function’s stack frame.
+* Memory is a **contiguous block**; “multi-dimensional” is just a **row-major layout** enforced by the compiler in C.
+* Accessing `arr[i][j]` computes the offset as `i*4 + j` internally.
+
+**Caveat:** the stack is limited (commonly 8 MB per thread on Linux). Declaring very large arrays, e.g.:
+
+```c
+int big[1000000][1000];
+```
+
+inside a function will **overflow the stack** → segfault.
+
+### File Scope (Globals / Statics)
+
+```c
+int arr[3][4];       // uninitialized
+int arr2[3][4] = {0}; // initialized
+```
+
+* **Uninitialized** or zero-initialized → `.bss`
+* **Initialized with non-zero values** → `.data`
+* These arrays are **not on the stack**.
+
+### Dynamic Allocation (Heap)
+
+* For very large arrays, stack allocation is unsafe.
+* Allocate memory dynamically with `malloc` / `new`, which goes into the **heap**.
+* Heap grows upward; stack grows downward. Each has separate limits.
+
+**Summary:**
+
+| Scope / Type             | Memory Region |
+| ------------------------ | ------------- |
+| Local array in function  | Stack         |
+| Global/static (init 0)   | .bss          |
+| Global/static (init !=0) | .data         |
+| Dynamic allocation       | Heap          |
+
+Stack vs. heap limits:
+
+* **Stack:** fixed per-thread limit (e.g., 8 MB on Linux). Exceed → stack overflow.
+* **Heap:** grows dynamically; limited by RAM + swap + OS-imposed virtual memory constraints.
+
 ---
 
 Overall, I feel a bit like a “kiddo-hacker” now, but it’s fascinating to finally see in reality the concepts I only heard about before.
