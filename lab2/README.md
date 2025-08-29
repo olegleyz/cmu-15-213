@@ -351,6 +351,48 @@ Stack vs. heap limits:
 * **Stack:** fixed per-thread limit (e.g., 8 MB on Linux). Exceed → stack overflow.
 * **Heap:** grows dynamically; limited by RAM + swap + OS-imposed virtual memory constraints.
 
+## Struct Alignment and Padding
+
+* In C, compilers **insert padding between struct members** to satisfy CPU alignment requirements, which ensures efficient memory access but can increase the memory footprint.
+
+* **Example:**
+
+```c
+struct S {
+    char c1;   // 1 byte
+    int x;     // 4 bytes
+    char c2;   // 1 byte
+};
+```
+
+On a 64-bit system, memory layout may look like:
+
+```
+Offset | Member
+0      | c1
+1-3    | padding
+4-7    | x
+8      | c2
+9-11   | padding
+```
+
+* `sizeof(S)` → 12 bytes, even though actual data is 6 bytes.
+
+- **Optimization:**
+
+  * Reordering members from largest to smallest alignment reduces padding:
+
+```c
+struct T {
+    int x;     // 4 bytes
+    char c1;   // 1 byte
+    char c2;   // 1 byte
+};
+```
+
+* `sizeof(T)` → 8 bytes (less padding).
+* This is important for **memory efficiency**, especially in large arrays of structs.
+
 ---
 
 Overall, I feel a bit like a “kiddo-hacker” now, but it’s fascinating to finally see in reality the concepts I only heard about before.
